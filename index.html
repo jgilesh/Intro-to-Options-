@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Introduction to Options Trading — demystified</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#F5F0E8; font-family:system-ui,-apple-system,sans-serif; color:#1a1108; min-height:100vh; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+.fu { animation:fadeUp 0.3s ease forwards; }
+.si { animation:slideIn 0.25s ease forwards; }
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#C4A460;border-radius:3px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const OR = "#F5853F";
+const RD = "#D94F2A";
+const GR = "#0D9E6E";
+const GD = "#C4A460";
+const PU = "#7C5CBF";
+const BL = "#2A7ED4";
+const DK = "#1a1108";
+const CA = "#fffcf7";
+const BD = "#e8ddd0";
+
+function NextBtn({ label, onClick }) {
+  return (
+    <button onClick={onClick} style={{background:OR,border:"none",borderRadius:"999px",
+      padding:"10px 26px",color:"#fff",fontWeight:"700",fontSize:"0.82rem",
+      letterSpacing:"0.06em",cursor:"pointer",display:"flex",alignItems:"center",
+      gap:"6px",margin:"24px auto 0"}}>
+      {label} →
+    </button>
+  );
+}
+
+function DarkCallout({ eyebrow, children }) {
+  return (
+    <div style={{background:"linear-gradient(130deg,#1a1108,#2c1d0e)",borderRadius:"12px",
+      padding:"16px 20px",marginBottom:"16px"}}>
+      <div style={{fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.15em",
+        textTransform:"uppercase",color:"#9a7a55",marginBottom:"8px"}}>{eyebrow}</div>
+      <div style={{fontSize:"0.88rem",color:"#e8ddd0",lineHeight:"1.7"}}>{children}</div>
+    </div>
+  );
+}
+
+function RuleBox({ rule }) {
+  return (
+    <div style={{background:"linear-gradient(130deg,#1a1108,#2c1d0e)",borderRadius:"8px",
+      padding:"11px 13px",marginBottom:"10px"}}>
+      <div style={{fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.12em",
+        textTransform:"uppercase",color:"#9a7a55",marginBottom:"6px"}}>⚡ The Rule</div>
+      <div style={{fontSize:"0.78rem",lineHeight:"1.65",color:"#e8ddd0"}}>{rule}</div>
+    </div>
+  );
+}
+
+function SectionLabel({ label, sub }) {
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"12px",
+      paddingBottom:"8px",borderBottom:"2px solid #e8ddd033"}}>
+      <div style={{width:"3px",height:"22px",background:OR,borderRadius:"2px"}}/>
+      <div>
+        <div style={{fontWeight:"700",fontSize:"0.88rem",color:DK}}>{label}</div>
+        {sub && <div style={{fontSize:"0.72rem",color:"#8a7560"}}>{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+function InfoBox({ icon, label, bg, dark, green, italic, mt, children }) {
+  return (
+    <div style={{background:bg,borderRadius:"8px",padding:"11px 13px",marginTop:mt?"10px":"0"}}>
+      <div style={{fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.12em",
+        textTransform:"uppercase",
+        color:dark?"#9a7a55":green?"#065f46":"#8a7560",marginBottom:"6px"}}>{icon} {label}</div>
+      <div style={{fontSize:"0.8rem",lineHeight:"1.65",
+        color:dark?"#e8ddd0":green?"#052e16":"#3d2e1e",
+        fontStyle:italic?"italic":"normal"}}>{children}</div>
+    </div>
+  );
+}
+
+function ExpandableCard({ accent, icon, title, shortDesc, isOpen, onToggle, children }) {
+  return (
+    <div style={{border:"1px solid "+(isOpen?accent:BD),borderRadius:isOpen?"12px 12px 0 0":"12px",
+      overflow:"hidden",marginBottom:"8px",background:CA}}>
+      <div onClick={onToggle} style={{display:"flex",alignItems:"center",gap:"12px",
+        padding:"14px 16px",cursor:"pointer",borderLeft:"4px solid "+accent,
+        background:isOpen?"#fffcf7":CA,transition:"background 0.15s"}}>
+        <span style={{fontSize:"1.2rem",flexShrink:0}}>{icon}</span>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:"700",fontSize:"0.9rem",color:DK,marginBottom:"2px"}}>{title}</div>
+          <div style={{fontSize:"0.75rem",color:"#8a7560",lineHeight:"1.4"}}>{shortDesc}</div>
+        </div>
+        <span style={{color:"#8a7560",fontSize:"13px",flexShrink:0,transition:"transform 0.2s",
+          transform:isOpen?"rotate(180deg)":"rotate(0deg)"}}>▼</span>
+      </div>
+      {isOpen && (
+        <div className="fu" style={{borderTop:"1px solid "+BD,border:"1px solid "+accent,
+          borderTop:"none",borderRadius:"0 0 12px 12px",overflow:"hidden",background:CA}}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChecklistBridge() {
+  return (
+    <div style={{marginTop:"20px",background:"linear-gradient(130deg,#1a1108,#2c1d0e)",
+      borderRadius:"14px",padding:"20px 22px",display:"flex",alignItems:"center",
+      gap:"16px",flexWrap:"wrap"}}>
+      <div style={{fontSize:"1.8rem",flexShrink:0}}>📋</div>
+      <div style={{flex:1}}>
+        <div style={{fontSize:"0.65rem",fontWeight:"700",letterSpacing:"0.15em",
+          textTransform:"uppercase",color:"#9a7a55",marginBottom:"5px"}}>Ready to put this into practice?</div>
+        <div style={{fontFamily:"Georgia,serif",fontSize:"1rem",color:"#fff",marginBottom:"5px"}}>
+          Use the Pre-Trade Checklist before entering any trade.</div>
+        <div style={{fontSize:"0.78rem",color:"#d4a87a",lineHeight:"1.55"}}>
+          The checklist walks you through 5 questions to evaluate a specific trade before you enter it.</div>
+      </div>
+      <a href="https://pre-trade-checklist.vercel.app/" target="_blank" rel="noopener noreferrer"
+        style={{flexShrink:0,background:OR,borderRadius:"999px",padding:"10px 22px",
+          fontWeight:"700",fontSize:"0.8rem",color:"#fff",letterSpacing:"0.06em",
+          whiteSpace:"nowrap",textDecoration:"none",display:"inline-block"}}>
+        Open Checklist →
+      </a>
+    </div>
+  );
+}
+
+// ─── TAB 1: WHAT IS AN OPTION ────────────────────────────────────────────────
+function Tab1({ onNext }) {
+  const [open, setOpen] = useState(null);
+  const toggle = (i) => setOpen(open === i ? null : i);
+
+  return (
+    <div className="fu">
+      <DarkCallout eyebrow="Module 1 · Introduction">
+        An option is a contract that gives you the right — but never the obligation — to buy or sell a stock at a specific price before a specific date. Before anything else, that one sentence is what you need to hold on to.
+      </DarkCallout>
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"10px",marginBottom:"18px"}}>
+        {[
+          {n:"1",color:OR,title:"A Right, Not a Duty",desc:"You can act on the contract — or let it expire. You are never forced to do anything."},
+          {n:"2",color:BL,title:"A Specific Price",desc:"The strike price is locked in at the start. The stock can move wherever it wants."},
+          {n:"3",color:PU,title:"A Specific Date",desc:"Every contract has an expiration date. After that date, the contract is gone."},
+        ].map(s => (
+          <div key={s.n} style={{background:CA,border:"1px solid "+BD,borderRadius:"10px",
+            padding:"14px",borderTop:"3px solid "+s.color}}>
+            <div style={{width:"24px",height:"24px",borderRadius:"50%",background:s.color,
+              color:"#fff",fontWeight:"700",fontSize:"0.78rem",display:"flex",
+              alignItems:"center",justifyContent:"center",marginBottom:"8px"}}>{s.n}</div>
+            <div style={{fontWeight:"700",fontSize:"0.82rem",color:DK,marginBottom:"4px"}}>{s.title}</div>
+            <div style={{fontSize:"0.72rem",color:"#5a4535",lineHeight:"1.5"}}>{s.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <SectionLabel label="The Two Types of Options" sub="Every option is one of these — nothing else." />
+
+      <ExpandableCard accent={GR} icon="📈" title="Call Option" shortDesc="The right to buy a stock at the strike price" isOpen={open===0} onToggle={()=>toggle(0)}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0"}}>
+          <div style={{padding:"16px",borderRight:"1px solid "+BD}}>
+            <InfoBox icon="📌" label="What It Is" bg="#f7f0e6">
+              A call option gives you the right to <strong>buy</strong> 100 shares of a stock at the strike price — before the expiration date. You pay a premium upfront to own that right.
+            </InfoBox>
+            <InfoBox icon="💡" label="Why It Matters" bg="#f7f0e6" mt>
+              You benefit when the stock goes up. If the stock rises above your strike price, your contract gains value. You don't have to own the stock to profit from its move.
+            </InfoBox>
+            <InfoBox icon="🎫" label="The Analogy" bg="#fff4eb" mt italic>
+              Think of a concert presale code. You lock in the right to buy a ticket at today's price. If the show sells out and resale prices double, your code is worth a lot more — even though you haven't used it yet.
+            </InfoBox>
+          </div>
+          <div style={{padding:"16px"}}>
+            <RuleBox rule="Buy a call when you believe the stock price will rise before the expiration date. If the stock stays flat or drops, your contract loses value." />
+            <InfoBox icon="🔢" label="Example" bg="#e8faf3" green>
+              Stock trading at $50. You buy a call with a $52 strike price, expiring in 30 days. You pay $1.30 premium. If the stock climbs to $56, your contract is now worth more than you paid. If it stays at $50, the contract expires worthless.
+            </InfoBox>
+          </div>
+        </div>
+      </ExpandableCard>
+
+      <ExpandableCard accent={RD} icon="📉" title="Put Option" shortDesc="The right to sell a stock at the strike price" isOpen={open===1} onToggle={()=>toggle(1)}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0"}}>
+          <div style={{padding:"16px",borderRight:"1px solid "+BD}}>
+            <InfoBox icon="📌" label="What It Is" bg="#f7f0e6">
+              A put option gives you the right to <strong>sell</strong> 100 shares of a stock at the strike price — before the expiration date. You pay a premium upfront to own that right.
+            </InfoBox>
+            <InfoBox icon="💡" label="Why It Matters" bg="#f7f0e6" mt>
+              You benefit when the stock goes down. If the stock falls below your strike price, your contract gains value. Puts are used to profit from a drop — or to protect shares you already own.
+            </InfoBox>
+            <InfoBox icon="🏠" label="The Analogy" bg="#fff4eb" mt italic>
+              Like home insurance. You pay a monthly premium for the right to "sell" your home to the insurer at a set price if something goes wrong. You hope you never need to use it — but the protection is real.
+            </InfoBox>
+          </div>
+          <div style={{padding:"16px"}}>
+            <RuleBox rule="Buy a put when you believe the stock price will fall before the expiration date. If the stock rises or stays flat, your contract loses value." />
+            <InfoBox icon="🔢" label="Example" bg="#fff0f0" mt>
+              <span style={{color:"#7a1f1f"}}>Stock trading at $50. You buy a put with a $48 strike price, expiring in 30 days. You pay $1.10 premium. If the stock falls to $44, your contract is now worth significantly more. If the stock climbs to $54, the contract expires worthless.</span>
+            </InfoBox>
+          </div>
+        </div>
+      </ExpandableCard>
+
+      <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",padding:"16px 18px",marginTop:"16px"}}>
+        <div style={{fontSize:"0.72rem",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:"#8a7560",marginBottom:"10px"}}>📊 Calls vs. Puts at a Glance</div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:"360px",fontSize:"0.8rem"}}>
+            <thead>
+              <tr style={{background:"#f0e8da"}}>
+                {["","Call Option","Put Option"].map(h=>(
+                  <th key={h} style={{padding:"9px 12px",textAlign:"left",fontWeight:"700",fontSize:"0.72rem",
+                    letterSpacing:"0.08em",textTransform:"uppercase",color:DK,borderBottom:"1px solid "+BD}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Right to","Buy 100 shares","Sell 100 shares"],
+                ["You profit when","Stock goes up","Stock goes down"],
+                ["Risk","Premium paid","Premium paid"],
+                ["Expires worthless if","Stock stays flat or drops","Stock stays flat or rises"],
+              ].map((row,i)=>(
+                <tr key={i} style={{background:i%2===0?CA:"#f9f3eb"}}>
+                  {row.map((cell,j)=>(
+                    <td key={j} style={{padding:"9px 12px",borderBottom:"1px solid "+BD,
+                      fontWeight:j===0?"700":"400",color:j===0?"#8a7560":DK}}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <NextBtn label="Next: Every Option Is a Contract" onClick={onNext} />
+    </div>
+  );
+}
+
+// ─── TAB 2: EVERY OPTION IS A CONTRACT (100 SHARES) ─────────────────────────
+function Tab2({ onNext }) {
+  const [open, setOpen] = useState(null);
+  const toggle = (i) => setOpen(open === i ? null : i);
+
+  return (
+    <div className="fu">
+      <DarkCallout eyebrow="The Most Important Number in Options">
+        Every option contract controls exactly 100 shares of the underlying stock. Not 1. Not 10. Always 100. This single fact changes everything about how you read prices, calculate costs, and think about risk.
+      </DarkCallout>
+
+      <SectionLabel label="Why 100 Shares?" sub="The rule that multiplies everything." />
+
+      <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",overflow:"hidden",borderLeft:"4px solid "+OR,marginBottom:"16px"}}>
+        <div style={{padding:"18px 20px"}}>
+          <div style={{fontSize:"0.72rem",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:"#8a7560",marginBottom:"10px"}}>The Contract Structure</div>
+          <p style={{fontSize:"0.87rem",lineHeight:"1.7",color:"#3d2e1e",marginBottom:"14px"}}>
+            When you see a contract priced at <strong>$1.30</strong>, that is the price <em>per share</em>. Because every contract covers 100 shares, the actual cost to enter the trade is <strong>$1.30 × 100 = $130</strong>.
+          </p>
+          <p style={{fontSize:"0.87rem",lineHeight:"1.7",color:"#3d2e1e"}}>
+            This is true whether the contract is worth $0.50 or $15.00. The price you see on the chain is always per-share. You always multiply by 100 to find the real dollar cost.
+          </p>
+        </div>
+        <div style={{background:"linear-gradient(130deg,#1a1108,#2c1d0e)",padding:"16px 20px",display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"12px"}}>
+          {[
+            {label:"Contract Price",val:"$1.30",sub:"Per share (what you see)"},
+            {label:"× Shares",val:"× 100",sub:"Always exactly 100"},
+            {label:"Your Cost",val:"$130",sub:"What you actually pay"},
+          ].map((item,i)=>(
+            <div key={i} style={{textAlign:"center"}}>
+              <div style={{fontSize:"0.6rem",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:"#9a7a55",marginBottom:"4px"}}>{item.label}</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:"1.4rem",fontWeight:"700",color:i===2?GR:"#fff",marginBottom:"2px"}}>{item.val}</div>
+              <div style={{fontSize:"0.68rem",color:"#6a5540"}}>{item.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <SectionLabel label="What the Contract Contains" sub="Every option contract specifies these four things." />
+
+      {[
+        {accent:OR,icon:"🎯",title:"The Underlying Stock",shortDesc:"Which company's shares the contract is tied to",idx:0},
+        {accent:BL,icon:"💲",title:"The Strike Price",shortDesc:"The fixed price at which you have the right to buy or sell",idx:1},
+        {accent:PU,icon:"📅",title:"The Expiration Date",shortDesc:"The last day this contract has any value",idx:2},
+        {accent:GD,icon:"📋",title:"The Type — Call or Put",shortDesc:"Whether you have the right to buy (call) or sell (put)",idx:3},
+      ].map(card=>(
+        <ExpandableCard key={card.idx} accent={card.accent} icon={card.icon} title={card.title} shortDesc={card.shortDesc} isOpen={open===card.idx} onToggle={()=>toggle(card.idx)}>
+          <div style={{padding:"16px"}}>
+            {card.idx===0 && <>
+              <InfoBox icon="📌" label="What It Means" bg="#f7f0e6">
+                The underlying stock is the company the option is written on. If you buy a contract on Apple, every element of that contract relates to 100 shares of Apple — the price, the movement, the expiration value.
+              </InfoBox>
+              <InfoBox icon="🔢" label="In Practice" bg="#fff4eb" mt>
+                You will always see the ticker first when reading the options chain. AAPL, TSLA, SPY — that is the underlying. One option contract = the right to control 100 shares of that ticker.
+              </InfoBox>
+            </>}
+            {card.idx===1 && <>
+              <InfoBox icon="📌" label="What It Means" bg="#f7f0e6">
+                The strike price is locked in when you enter the trade. If you buy a call at a $52 strike on a stock currently at $50, you have the right to buy 100 shares at $52 — no matter where the stock goes.
+              </InfoBox>
+              <RuleBox rule="Always compare the strike price to where the stock is currently trading. That relationship — in the money, at the money, or out of the money — determines how your contract behaves. You will go deep on this in a later module." />
+            </>}
+            {card.idx===2 && <>
+              <InfoBox icon="📌" label="What It Means" bg="#f7f0e6">
+                The expiration date is the contract's deadline. If you have not acted on your right by that date, the contract expires worthless. You lose the premium you paid — nothing more, nothing less.
+              </InfoBox>
+              <InfoBox icon="🎫" label="The Analogy" bg="#fff4eb" mt italic>
+                Like a coupon for a free pizza. It is worth something today. Let the expiration date pass without using it and it is worth zero — the store keeps your money.
+              </InfoBox>
+              <RuleBox rule="Always check the expiration date before you buy. A contract expiring in 5 days behaves very differently from one expiring in 45 days. Never buy a contract without knowing how much time you have." />
+            </>}
+            {card.idx===3 && <>
+              <InfoBox icon="📌" label="What It Means" bg="#f7f0e6">
+                Every contract is either a call or a put — there is no third option. Calls give you the right to buy. Puts give you the right to sell. This determines your entire directional bet.
+              </InfoBox>
+              <InfoBox icon="🔢" label="The Math" bg="#e8faf3" green>
+                Call on stock at $50 · strike $52 · expiry 30 days · price $1.30<br/>
+                Cost to enter: $1.30 × 100 = <strong>$130 total</strong><br/>
+                Maximum loss if it expires worthless: exactly $130.
+              </InfoBox>
+            </>}
+          </div>
+        </ExpandableCard>
+      ))}
+
+      <div style={{background:"#fff4eb",border:"1px solid #fad0a8",borderRadius:"12px",padding:"16px 18px",marginTop:"8px"}}>
+        <div style={{fontSize:"0.72rem",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:OR,marginBottom:"8px"}}>⚡ Always Remember</div>
+        <p style={{fontSize:"0.85rem",lineHeight:"1.7",color:"#3d2e1e"}}>
+          When someone says "I bought one contract," they control 100 shares. When the contract price moves by $0.10, your profit or loss moves by <strong>$10</strong> (0.10 × 100). Small price movements have real dollar impact.
+        </p>
+      </div>
+
+      <NextBtn label="Next: The Price You Pay" onClick={onNext} />
+    </div>
+  );
+}
+
+// ─── TAB 3: THE PRICE YOU PAY (BID / ASK / PREMIUM) ─────────────────────────
+function Tab3({ onNext }) {
+  const [open, setOpen] = useState(null);
+  const toggle = (i) => setOpen(open === i ? null : i);
+
+  return (
+    <div className="fu">
+      <DarkCallout eyebrow="Reading Option Prices">
+        When you look up any option contract, you will see two prices side by side: the Bid and the Ask. These are not the same number. Knowing which one applies to you — and what it actually costs — is the foundation of every trade.
+      </DarkCallout>
+
+      <SectionLabel label="Bid and Ask — The Two Prices" sub="You will see both every time you open the chain." />
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"16px"}}>
+        <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",overflow:"hidden",borderTop:"4px solid "+BL}}>
+          <div style={{padding:"16px 18px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+              <span style={{fontSize:"1.3rem"}}>📥</span>
+              <div>
+                <div style={{fontWeight:"700",fontSize:"0.9rem",color:DK}}>The Bid</div>
+                <div style={{fontSize:"0.72rem",color:"#8a7560"}}>What buyers are offering to pay</div>
+              </div>
+            </div>
+            <p style={{fontSize:"0.82rem",lineHeight:"1.65",color:"#3d2e1e",marginBottom:"12px"}}>
+              The bid is the highest price someone in the market is currently willing to pay for the contract. If you are <strong>selling</strong> a contract, you get the bid price.
+            </p>
+            <div style={{background:"#edf4ff",borderRadius:"8px",padding:"10px 12px"}}>
+              <div style={{fontSize:"0.68rem",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:BL,marginBottom:"4px"}}>Bid Example</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:"1.4rem",fontWeight:"700",color:BL}}>$1.25</div>
+              <div style={{fontSize:"0.72rem",color:"#2a5aa0",marginTop:"2px"}}>Seller receives $1.25 × 100 = $125</div>
+            </div>
+          </div>
+        </div>
+        <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",overflow:"hidden",borderTop:"4px solid "+OR}}>
+          <div style={{padding:"16px 18px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}}>
+              <span style={{fontSize:"1.3rem"}}>📤</span>
+              <div>
+                <div style={{fontWeight:"700",fontSize:"0.9rem",color:DK}}>The Ask</div>
+                <div style={{fontSize:"0.72rem",color:"#8a7560"}}>What sellers are asking you to pay</div>
+              </div>
+            </div>
+            <p style={{fontSize:"0.82rem",lineHeight:"1.65",color:"#3d2e1e",marginBottom:"12px"}}>
+              The ask is the lowest price someone is currently willing to sell the contract for. If you are <strong>buying</strong> a contract, you pay the ask price.
+            </p>
+            <div style={{background:"#fff4eb",borderRadius:"8px",padding:"10px 12px"}}>
+              <div style={{fontSize:"0.68rem",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:OR,marginBottom:"4px"}}>Ask Example</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:"1.4rem",fontWeight:"700",color:OR}}>$1.30</div>
+              <div style={{fontSize:"0.72rem",color:"#a05020",marginTop:"2px"}}>Buyer pays $1.30 × 100 = $130</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <SectionLabel label="The Bid-Ask Spread" sub="The gap between the two prices — and why it matters." />
+
+      <ExpandableCard accent={GD} icon="↔️" title="The Spread" shortDesc="The difference between Bid and Ask is the cost of doing business" isOpen={open===0} onToggle={()=>toggle(0)}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0"}}>
+          <div style={{padding:"16px",borderRight:"1px solid "+BD}}>
+            <InfoBox icon="📌" label="What It Is" bg="#f7f0e6">
+              The spread is simply Ask minus Bid. In the example above: $1.30 − $1.25 = <strong>$0.05 spread</strong>. The moment you buy at the ask, you are already $0.05 behind because to exit immediately you would only receive the bid.
+            </InfoBox>
+            <InfoBox icon="💡" label="Why It Matters" bg="#f7f0e6" mt>
+              A tight spread ($0.01–$0.05) means the contract is liquid — lots of buyers and sellers. A wide spread ($0.50 or more) means the contract is illiquid. Wide spreads make it harder and more expensive to enter and exit cleanly.
+            </InfoBox>
+            <InfoBox icon="🛒" label="The Analogy" bg="#fff4eb" mt italic>
+              Like a currency exchange at the airport. They buy your dollars at one rate and sell at a higher rate. The gap between those two numbers is their fee. Liquid options markets have tiny gaps. Illiquid ones charge you a lot just to get in.
+            </InfoBox>
+          </div>
+          <div style={{padding:"16px"}}>
+            <RuleBox rule="Always check the spread before you enter. A spread wider than $0.10 on a low-priced contract is a red flag. Stick to liquid contracts with tight spreads — your entries and exits will be cleaner and cheaper." />
+            <InfoBox icon="🔢" label="Example" bg="#f7f0e6" mt>
+              Bid $1.25 · Ask $1.30 · Spread $0.05<br/>
+              You buy 1 contract at the ask: <strong>$130</strong><br/>
+              To break even on exit, the ask must move above $1.30.<br/>
+              The spread is the first hurdle every trade must clear.
+            </InfoBox>
+          </div>
+        </div>
+      </ExpandableCard>
+
+      <SectionLabel label="The Premium — What You Actually Pay" sub="The total real-dollar cost of entering a contract." />
+
+      <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",overflow:"hidden",borderLeft:"4px solid "+GR,marginBottom:"12px"}}>
+        <div style={{padding:"18px 20px"}}>
+          <p style={{fontSize:"0.87rem",lineHeight:"1.7",color:"#3d2e1e",marginBottom:"14px"}}>
+            The <strong>premium</strong> is the total amount you pay to enter a contract. It is the ask price multiplied by 100. The premium is also your maximum possible loss — if the contract expires worthless, you lose the premium and nothing more.
+          </p>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"10px"}}>
+            {[
+              {ask:"$0.50",premium:"$50",note:"Low-cost contract"},
+              {ask:"$1.30",premium:"$130",note:"Mid-range contract"},
+              {ask:"$4.50",premium:"$450",note:"Higher-priced contract"},
+            ].map((row,i)=>(
+              <div key={i} style={{background:"#f0faf5",border:"1px solid #a7e8ca",borderRadius:"8px",padding:"12px",textAlign:"center"}}>
+                <div style={{fontSize:"0.65rem",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:"#065f46",marginBottom:"6px"}}>Ask: {row.ask}</div>
+                <div style={{fontFamily:"Georgia,serif",fontSize:"1.3rem",fontWeight:"700",color:GR}}>{row.premium}</div>
+                <div style={{fontSize:"0.68rem",color:"#3d7a5f",marginTop:"4px"}}>{row.note}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{background:"linear-gradient(130deg,#1a1108,#2c1d0e)",borderRadius:"12px",padding:"18px 20px",marginBottom:"8px"}}>
+        <div style={{fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.15em",textTransform:"uppercase",color:"#9a7a55",marginBottom:"10px"}}>📋 Price Reading — Quick Reference</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px"}}>
+          {[
+            {label:"You are buying",price:"Pay the Ask",color:OR},
+            {label:"You are selling",price:"Receive the Bid",color:BL},
+            {label:"Total cost / max loss",price:"Ask × 100",color:GR},
+          ].map((item,i)=>(
+            <div key={i} style={{textAlign:"center"}}>
+              <div style={{fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:"#9a7a55",marginBottom:"5px"}}>{item.label}</div>
+              <div style={{fontFamily:"Georgia,serif",fontSize:"0.95rem",fontWeight:"700",color:item.color}}>{item.price}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <NextBtn label="Next: Quick Reference" onClick={onNext} />
+    </div>
+  );
+}
+
+// ─── TAB 4: QUICK REFERENCE ──────────────────────────────────────────────────
+function Tab4() {
+  return (
+    <div className="fu">
+      <DarkCallout eyebrow="Module Summary">
+        Everything you need from this module in one place. Use this tab as your reference before moving on to the options chain, the Greeks, and trade setup in the modules ahead.
+      </DarkCallout>
+
+      <SectionLabel label="Core Vocabulary" sub="Every term you need from this module." />
+
+      <div style={{background:CA,border:"1px solid "+BD,borderRadius:"14px",overflow:"hidden",marginBottom:"16px"}}>
+        <div style={{background:"#f0e8da",padding:"12px 16px",borderBottom:"1px solid "+BD}}>
+          <div style={{fontWeight:"700",fontSize:"0.82rem",color:DK}}>📋 Options Basics — Term Reference</div>
+          <div style={{fontSize:"0.72rem",color:"#8a7560",marginTop:"2px"}}>Review before moving to the next module</div>
+        </div>
+        <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:"480px"}}>
+            <thead>
+              <tr style={{background:"#f5ede0"}}>
+                {["Term","Definition","Key Number / Rule"].map(h=>(
+                  <th key={h} style={{padding:"10px 14px",textAlign:"left",fontWeight:"700",fontSize:"0.7rem",
+                    letterSpacing:"0.08em",textTransform:"uppercase",color:DK,borderBottom:"1px solid "+BD}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ["Option","A contract giving you the right — not obligation — to buy or sell a stock","Always call or put. Never both."],
+                ["Call Option","The right to buy 100 shares at the strike price before expiry","Profit when stock goes up"],
+                ["Put Option","The right to sell 100 shares at the strike price before expiry","Profit when stock goes down"],
+                ["Contract","One unit of options — always represents 100 shares","1 contract = 100 shares. Always."],
+                ["Premium","The total cost to enter a contract","Ask price × 100"],
+                ["Strike Price","The fixed buy/sell price locked into the contract","Set at purchase. Doesn't move."],
+                ["Expiration Date","The last day the contract has any value","After this date: expires worthless"],
+                ["Bid","What buyers will pay — what you receive when selling","Always the lower price"],
+                ["Ask","What sellers want — what you pay when buying","Always the higher price"],
+                ["Spread","The gap between Bid and Ask","Tight = liquid. Wide = illiquid."],
+              ].map((row,i)=>(
+                <tr key={i} style={{background:i%2===0?CA:"#f9f3eb"}}>
+                  <td style={{padding:"10px 14px",borderBottom:"1px solid "+BD,fontWeight:"700",color:OR,fontSize:"0.82rem"}}>{row[0]}</td>
+                  <td style={{padding:"10px 14px",borderBottom:"1px solid "+BD,fontSize:"0.8rem",color:"#3d2e1e",lineHeight:"1.5"}}>{row[1]}</td>
+                  <td style={{padding:"10px 14px",borderBottom:"1px solid "+BD,fontSize:"0.78rem",color:"#5a4535",fontStyle:"italic"}}>{row[2]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <SectionLabel label="The Rules from This Module" sub="Apply these every time you look at a contract." />
+
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:"10px",marginBottom:"16px"}}>
+        {[
+          {icon:"📐",color:OR,rule:"Multiply by 100",desc:"Every price you see on the chain is per share. Always multiply by 100 to find your real cost."},
+          {icon:"📅",color:PU,rule:"Check the date first",desc:"Know your expiration date before you enter any trade. Time is always working against you."},
+          {icon:"↔️",color:GD,rule:"Read the spread",desc:"Buying at the ask, selling at the bid. A wide spread is a hidden cost on every trade."},
+          {icon:"🎯",color:GR,rule:"Know your max loss",desc:"When buying contracts, your max loss is always the premium paid — Ask × 100. Nothing more."},
+        ].map((item,i)=>(
+          <div key={i} style={{background:CA,border:"1px solid "+BD,borderRadius:"10px",padding:"14px 16px",borderLeft:"4px solid "+item.color}}>
+            <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}}>
+              <span style={{fontSize:"1.1rem"}}>{item.icon}</span>
+              <div style={{fontWeight:"700",fontSize:"0.85rem",color:DK}}>{item.rule}</div>
+            </div>
+            <div style={{fontSize:"0.78rem",color:"#5a4535",lineHeight:"1.55"}}>{item.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{background:"#fff4eb",border:"1px solid #fad0a8",borderRadius:"12px",padding:"16px 18px",marginBottom:"8px"}}>
+        <div style={{fontSize:"0.72rem",fontWeight:"700",letterSpacing:"0.12em",textTransform:"uppercase",color:OR,marginBottom:"8px"}}>📌 What Comes Next</div>
+        <p style={{fontSize:"0.85rem",lineHeight:"1.7",color:"#3d2e1e"}}>
+          The next module covers the <strong>options chain</strong> — where you find contracts, how to read every column, and how strike prices and expiration dates are organized. Everything you learned here will be live on the chain.
+        </p>
+      </div>
+
+      <ChecklistBridge />
+    </div>
+  );
+}
+
+// ─── APP ─────────────────────────────────────────────────────────────────────
+function App() {
+  const [tab, setTab] = useState(0);
+
+  const TABS = [
+    {icon:"📖",label:"What Is an Option"},
+    {icon:"📦",label:"The Contract"},
+    {icon:"💲",label:"The Price You Pay"},
+    {icon:"📋",label:"Quick Reference"},
+  ];
+
+  const tabContent = [
+    <Tab1 onNext={()=>setTab(1)} />,
+    <Tab2 onNext={()=>setTab(2)} />,
+    <Tab3 onNext={()=>setTab(3)} />,
+    <Tab4 />,
+  ];
+
+  return (
+    <div>
+      {/* Topbar */}
+      <div style={{background:DK,padding:"11px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:"Georgia,serif",fontStyle:"italic",fontSize:"1.2rem",color:"#fff"}}>demystified</span>
+        <a href="https://options101-hub.vercel.app/"
+          style={{display:"flex",alignItems:"center",gap:"6px",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.14)",borderRadius:"999px",padding:"5px 14px",textDecoration:"none"}}
+          onMouseOver={e=>e.currentTarget.style.background="rgba(255,255,255,0.15)"}
+          onMouseOut={e=>e.currentTarget.style.background="rgba(255,255,255,0.08)"}>
+          <span style={{color:"#d4a87a",fontSize:"0.8rem"}}>←</span>
+          <span style={{fontSize:"0.65rem",fontWeight:"700",letterSpacing:"0.1em",textTransform:"uppercase",color:"#d4a87a"}}>Options 101 Hub</span>
+        </a>
+        <div style={{width:"22px",height:"22px",background:OR,borderRadius:"5px"}}/>
+      </div>
+
+      {/* Page */}
+      <div style={{maxWidth:"860px",margin:"0 auto",padding:"22px 16px"}}>
+
+        {/* Header */}
+        <div style={{marginBottom:"18px"}}>
+          <div style={{display:"inline-block",background:"#fff4eb",border:"1px solid #fad0a8",color:OR,
+            fontSize:"0.62rem",fontWeight:"700",letterSpacing:"0.14em",textTransform:"uppercase",
+            padding:"3px 10px",borderRadius:"999px",marginBottom:"8px"}}>
+            📘 Options 101 · Module 1
+          </div>
+          <h1 style={{fontFamily:"Georgia,serif",fontSize:"clamp(1.7rem,4vw,2.3rem)",color:DK,
+            letterSpacing:"-0.03em",lineHeight:"1.15",marginBottom:"4px"}}>Introduction to Options Trading</h1>
+          <p style={{color:"#8a7560",fontSize:"0.85rem"}}>What options are, how contracts work, and what you actually pay to enter a trade.</p>
+        </div>
+
+        {/* Tabs */}
+        <div style={{display:"flex",gap:"3px",background:"#e4d8c8",borderRadius:"12px",padding:"3px",marginBottom:"10px"}}>
+          {TABS.map((t,i)=>(
+            <button key={i} onClick={()=>setTab(i)} style={{
+              flex:1, padding:"9px 4px", border:"none", borderRadius:"9px", cursor:"pointer",
+              fontWeight:"700", fontSize:"0.62rem", letterSpacing:"0.02em", transition:"all 0.18s",
+              background:tab===i?"#fff":"transparent",
+              color:tab===i?OR:"#8a7560",
+              boxShadow:tab===i?"0 1px 6px rgba(0,0,0,0.09)":"none", lineHeight:"1.3"
+            }}>
+              <div>{t.icon}</div>
+              <div style={{marginTop:"2px"}}>{t.label}</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Progress bar */}
+        <div style={{height:"3px",background:"#e4d8c8",borderRadius:"2px",marginBottom:"20px"}}>
+          <div style={{height:"100%",width:`${(tab/(TABS.length-1))*100}%`,
+            background:OR,borderRadius:"2px",transition:"width 0.4s ease"}}/>
+        </div>
+
+        {/* Content */}
+        {tabContent[tab]}
+
+        {/* Footer */}
+        <div style={{marginTop:"24px",textAlign:"center",fontSize:"0.65rem",color:"#b0a090",letterSpacing:"0.05em"}}>
+          <span style={{fontFamily:"Georgia,serif",fontStyle:"italic"}}>demystified</span> · For educational purposes only · Not financial advice · Options trading involves significant risk
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
