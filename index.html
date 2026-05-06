@@ -80,7 +80,7 @@ function SectionLabel({ label, sub }) {
 function Tab1({ onNext }) {
   return (
     <div className="fu">
-      <DarkCallout eyebrow="Module 1 · Introduction">
+      <DarkCallout eyebrow="Introduction">
         An option is a contract that gives you the right — but not the obligation — to buy or sell a stock at a specific price before a specific date. That one sentence is the foundation.
       </DarkCallout>
 
@@ -218,22 +218,21 @@ function Tab1({ onNext }) {
 function Tab2() {
   return (
     <div className="fu">
-
-      <SectionLabel label="1 Contract = 100 Shares. Always." sub="The most important number in options." />
+      <SectionLabel label="1 Contract = 100 Shares" sub="The most important number in options." />
 
       {/* 100-shares card */}
       <div style={{background:CA,border:"1px solid "+BD,borderRadius:"12px",
         overflow:"hidden",borderLeft:"4px solid "+OR,marginBottom:"10px"}}>
         <div style={{padding:"18px 20px"}}>
           <p style={{fontSize:"0.87rem",lineHeight:"1.7",color:"#3d2e1e",marginBottom:"16px"}}>
-            When you see a contract priced at <strong>$1.30</strong>, that is the price <em>per share</em>. Because every contract covers 100 shares, your actual cost to enter the trade is <strong>$1.30 × 100 = $130</strong>. This is true for every contract on the chain — no exceptions.
+            When you see a contract priced at <strong>$1.30</strong>, that is the price <em>per share</em>. Because every contract covers 100 shares, your actual cost to enter the trade is <strong>$1.30 × 100 = $130</strong>. That $130 is your <strong>premium</strong> — the total amount you pay to enter the trade.
           </p>
           <div style={{background:"linear-gradient(130deg,#1a1108,#2c1d0e)",borderRadius:"10px",
             padding:"16px 20px",display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"12px",marginBottom:"14px"}}>
             {[
-              {label:"Contract Price", val:"$1.30", sub:"Per share (what you see)"},
+              {label:"Contract Price", val:"$1.30", sub:"100 shares per contract"},
               {label:"× Shares",       val:"× 100", sub:"Always exactly 100"},
-              {label:"Your Cost",      val:"$130",  sub:"What you actually pay"},
+              {label:"Premium",        val:"$130",  sub:"What you pay to enter"},
             ].map((item,i)=>(
               <div key={i} style={{textAlign:"center"}}>
                 <div style={{fontSize:"0.6rem",fontWeight:"700",letterSpacing:"0.12em",
